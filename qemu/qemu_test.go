@@ -27,51 +27,51 @@ func testConfigAppend(config *Config, structure interface{}, expected string, t 
 	switch s := structure.(type) {
 	case Machine:
 		config.Machine = s
-		config.appendMachine()
+		config.AppendMachine()
 	case FwCfg:
 		config.FwCfg = []FwCfg{s}
-		config.appendFwCfg(nil)
+		config.AppendFwCfg(nil)
 
 	case Device:
 		config.Devices = []Device{s}
-		config.appendDevices(nil)
+		config.AppendDevices(nil)
 
 	case Knobs:
 		config.Knobs = s
-		config.appendKnobs()
+		config.AppendKnobs()
 
 	case Kernel:
 		config.Kernel = s
-		config.appendKernel()
+		config.AppendKernel()
 
 	case Memory:
 		config.Memory = s
-		config.appendMemory()
+		config.AppendMemory()
 
 	case SMP:
 		config.SMP = s
-		if err := config.appendCPUs(); err != nil {
+		if err := config.AppendCPUs(); err != nil {
 			t.Fatalf("Unexpected error: %v", err)
 		}
 
 	case QMPSocket:
 		config.QMPSockets = []QMPSocket{s}
-		config.appendQMPSockets()
+		config.AppendQMPSockets()
 
 	case []QMPSocket:
 		config.QMPSockets = s
-		config.appendQMPSockets()
+		config.AppendQMPSockets()
 
 	case RTC:
 		config.RTC = s
-		config.appendRTC()
+		config.AppendRTC()
 
 	case IOThread:
 		config.IOThreads = []IOThread{s}
-		config.appendIOThreads()
+		config.AppendIOThreads()
 	case Incoming:
 		config.Incoming = s
-		config.appendIncoming()
+		config.AppendIncoming()
 	}
 
 	result := strings.Join(config.qemuParams, " ")
@@ -693,7 +693,7 @@ func TestFailToAppendCPUs(t *testing.T) {
 		},
 	}
 
-	if err := config.appendCPUs(); err == nil {
+	if err := config.AppendCPUs(); err == nil {
 		t.Fatalf("Expected appendCPUs to fail")
 	}
 }
@@ -757,11 +757,11 @@ func TestAppendStrings(t *testing.T) {
 		LogFile:  logfile,
 	}
 
-	config.appendName()
-	config.appendCPUModel()
-	config.appendUUID()
-	config.appendPidFile()
-	config.appendLogFile()
+	config.AppendName()
+	config.AppendCPUModel()
+	config.AppendUUID()
+	config.AppendPidFile()
+	config.AppendLogFile()
 
 	result := strings.Join(config.qemuParams, " ")
 	if result != qemuString {
@@ -825,7 +825,7 @@ func TestAppendIncomingDefer(t *testing.T) {
 
 func TestBadName(t *testing.T) {
 	c := &Config{}
-	c.appendName()
+	c.AppendName()
 	if len(c.qemuParams) != 0 {
 		t.Errorf("Expected empty qemuParams, found %s", c.qemuParams)
 	}
@@ -833,7 +833,7 @@ func TestBadName(t *testing.T) {
 
 func TestBadMachine(t *testing.T) {
 	c := &Config{}
-	c.appendMachine()
+	c.AppendMachine()
 	if len(c.qemuParams) != 0 {
 		t.Errorf("Expected empty qemuParams, found %s", c.qemuParams)
 	}
@@ -841,7 +841,7 @@ func TestBadMachine(t *testing.T) {
 
 func TestBadCPUModel(t *testing.T) {
 	c := &Config{}
-	c.appendCPUModel()
+	c.AppendCPUModel()
 	if len(c.qemuParams) != 0 {
 		t.Errorf("Expected empty qemuParams, found %s", c.qemuParams)
 	}
@@ -849,7 +849,7 @@ func TestBadCPUModel(t *testing.T) {
 
 func TestBadQMPSockets(t *testing.T) {
 	c := &Config{}
-	c.appendQMPSockets()
+	c.AppendQMPSockets()
 	if len(c.qemuParams) != 0 {
 		t.Errorf("Expected empty qemuParams, found %s", c.qemuParams)
 	}
@@ -858,7 +858,7 @@ func TestBadQMPSockets(t *testing.T) {
 		QMPSockets: []QMPSocket{{}},
 	}
 
-	c.appendQMPSockets()
+	c.AppendQMPSockets()
 	if len(c.qemuParams) != 0 {
 		t.Errorf("Expected empty qemuParams, found %s", c.qemuParams)
 	}
@@ -867,7 +867,7 @@ func TestBadQMPSockets(t *testing.T) {
 		QMPSockets: []QMPSocket{{Name: "test"}},
 	}
 
-	c.appendQMPSockets()
+	c.AppendQMPSockets()
 	if len(c.qemuParams) != 0 {
 		t.Errorf("Expected empty qemuParams, found %s", c.qemuParams)
 	}
@@ -881,7 +881,7 @@ func TestBadQMPSockets(t *testing.T) {
 		},
 	}
 
-	c.appendQMPSockets()
+	c.AppendQMPSockets()
 	if len(c.qemuParams) != 0 {
 		t.Errorf("Expected empty qemuParams, found %s", c.qemuParams)
 	}
@@ -889,7 +889,7 @@ func TestBadQMPSockets(t *testing.T) {
 
 func TestBadDevices(t *testing.T) {
 	c := &Config{}
-	c.appendDevices(nil)
+	c.AppendDevices(nil)
 	if len(c.qemuParams) != 0 {
 		t.Errorf("Expected empty qemuParams, found %s", c.qemuParams)
 	}
@@ -941,7 +941,7 @@ func TestBadDevices(t *testing.T) {
 		},
 	}
 
-	c.appendDevices(nil)
+	c.AppendDevices(nil)
 	if len(c.qemuParams) != 0 {
 		t.Errorf("Expected empty qemuParams, found %s", c.qemuParams)
 	}
@@ -949,7 +949,7 @@ func TestBadDevices(t *testing.T) {
 
 func TestBadRTC(t *testing.T) {
 	c := &Config{}
-	c.appendRTC()
+	c.AppendRTC()
 	if len(c.qemuParams) != 0 {
 		t.Errorf("Expected empty qemuParams, found %s", c.qemuParams)
 	}
@@ -959,7 +959,7 @@ func TestBadRTC(t *testing.T) {
 			Clock: RTCClock("invalid"),
 		},
 	}
-	c.appendRTC()
+	c.AppendRTC()
 	if len(c.qemuParams) != 0 {
 		t.Errorf("Expected empty qemuParams, found %s", c.qemuParams)
 	}
@@ -970,7 +970,7 @@ func TestBadRTC(t *testing.T) {
 			DriftFix: RTCDriftFix("invalid"),
 		},
 	}
-	c.appendRTC()
+	c.AppendRTC()
 	if len(c.qemuParams) != 0 {
 		t.Errorf("Expected empty qemuParams, found %s", c.qemuParams)
 	}
@@ -978,7 +978,7 @@ func TestBadRTC(t *testing.T) {
 
 func TestBadGlobalParam(t *testing.T) {
 	c := &Config{}
-	c.appendGlobalParam()
+	c.AppendGlobalParam()
 	if len(c.qemuParams) != 0 {
 		t.Errorf("Expected empty qemuParams, found %s", c.qemuParams)
 	}
@@ -986,7 +986,7 @@ func TestBadGlobalParam(t *testing.T) {
 
 func TestBadPFlash(t *testing.T) {
 	c := &Config{}
-	c.appendPFlashParam()
+	c.AppendPFlashParam()
 	if len(c.qemuParams) != 0 {
 		t.Errorf("Expected empty qemuParams, found %s", c.qemuParams)
 	}
@@ -995,7 +995,7 @@ func TestBadPFlash(t *testing.T) {
 func TestValidPFlash(t *testing.T) {
 	c := &Config{}
 	c.PFlash = []string{"flash0", "flash1"}
-	c.appendPFlashParam()
+	c.AppendPFlashParam()
 	expected := []string{"-pflash", "flash0", "-pflash", "flash1"}
 	ok := reflect.DeepEqual(expected, c.qemuParams)
 	if !ok {
@@ -1005,7 +1005,7 @@ func TestValidPFlash(t *testing.T) {
 
 func TestBadSeccompSandbox(t *testing.T) {
 	c := &Config{}
-	c.appendSeccompSandbox()
+	c.AppendSeccompSandbox()
 	if len(c.qemuParams) != 0 {
 		t.Errorf("Expected empty qemuParams, found %s", c.qemuParams)
 	}
@@ -1014,7 +1014,7 @@ func TestBadSeccompSandbox(t *testing.T) {
 func TestValidSeccompSandbox(t *testing.T) {
 	c := &Config{}
 	c.SeccompSandbox = string("on,obsolete=deny")
-	c.appendSeccompSandbox()
+	c.AppendSeccompSandbox()
 	expected := []string{"-sandbox", "on,obsolete=deny"}
 	ok := reflect.DeepEqual(expected, c.qemuParams)
 	if !ok {
@@ -1024,7 +1024,7 @@ func TestValidSeccompSandbox(t *testing.T) {
 
 func TestBadVGA(t *testing.T) {
 	c := &Config{}
-	c.appendVGA()
+	c.AppendVGA()
 	if len(c.qemuParams) != 0 {
 		t.Errorf("Expected empty qemuParams, found %s", c.qemuParams)
 	}
@@ -1032,7 +1032,7 @@ func TestBadVGA(t *testing.T) {
 
 func TestBadKernel(t *testing.T) {
 	c := &Config{}
-	c.appendKernel()
+	c.AppendKernel()
 	if len(c.qemuParams) != 0 {
 		t.Errorf("Expected empty qemuParams, found %s", c.qemuParams)
 	}
@@ -1040,7 +1040,7 @@ func TestBadKernel(t *testing.T) {
 
 func TestBadMemoryKnobs(t *testing.T) {
 	c := &Config{}
-	c.appendMemoryKnobs()
+	c.AppendMemoryKnobs()
 	if len(c.qemuParams) != 0 {
 		t.Errorf("Expected empty qemuParams, found %s", c.qemuParams)
 	}
@@ -1050,7 +1050,7 @@ func TestBadMemoryKnobs(t *testing.T) {
 			HugePages: true,
 		},
 	}
-	c.appendMemoryKnobs()
+	c.AppendMemoryKnobs()
 	if len(c.qemuParams) != 0 {
 		t.Errorf("Expected empty qemuParams, found %s", c.qemuParams)
 	}
@@ -1060,7 +1060,7 @@ func TestBadMemoryKnobs(t *testing.T) {
 			MemShared: true,
 		},
 	}
-	c.appendMemoryKnobs()
+	c.AppendMemoryKnobs()
 	if len(c.qemuParams) != 0 {
 		t.Errorf("Expected empty qemuParams, found %s", c.qemuParams)
 	}
@@ -1070,7 +1070,7 @@ func TestBadMemoryKnobs(t *testing.T) {
 			MemPrealloc: true,
 		},
 	}
-	c.appendMemoryKnobs()
+	c.AppendMemoryKnobs()
 	if len(c.qemuParams) != 0 {
 		t.Errorf("Expected empty qemuParams, found %s", c.qemuParams)
 	}
@@ -1078,7 +1078,7 @@ func TestBadMemoryKnobs(t *testing.T) {
 
 func TestBadBios(t *testing.T) {
 	c := &Config{}
-	c.appendBios()
+	c.AppendBios()
 	if len(c.qemuParams) != 0 {
 		t.Errorf("Expected empty qemuParams, found %s", c.qemuParams)
 	}
@@ -1086,7 +1086,7 @@ func TestBadBios(t *testing.T) {
 
 func TestBadIOThreads(t *testing.T) {
 	c := &Config{}
-	c.appendIOThreads()
+	c.AppendIOThreads()
 	if len(c.qemuParams) != 0 {
 		t.Errorf("Expected empty qemuParams, found %s", c.qemuParams)
 	}
@@ -1094,7 +1094,7 @@ func TestBadIOThreads(t *testing.T) {
 	c = &Config{
 		IOThreads: []IOThread{{ID: ""}},
 	}
-	c.appendIOThreads()
+	c.AppendIOThreads()
 	if len(c.qemuParams) != 0 {
 		t.Errorf("Expected empty qemuParams, found %s", c.qemuParams)
 	}
@@ -1102,7 +1102,7 @@ func TestBadIOThreads(t *testing.T) {
 
 func TestBadIncoming(t *testing.T) {
 	c := &Config{}
-	c.appendIncoming()
+	c.AppendIncoming()
 	if len(c.qemuParams) != 0 {
 		t.Errorf("Expected empty qemuParams, found %s", c.qemuParams)
 	}
@@ -1110,7 +1110,7 @@ func TestBadIncoming(t *testing.T) {
 
 func TestBadCPUs(t *testing.T) {
 	c := &Config{}
-	if err := c.appendCPUs(); err != nil {
+	if err := c.AppendCPUs(); err != nil {
 		t.Fatalf("No error expected got %v", err)
 	}
 	if len(c.qemuParams) != 0 {
@@ -1123,14 +1123,14 @@ func TestBadCPUs(t *testing.T) {
 			CPUs:    2,
 		},
 	}
-	if c.appendCPUs() == nil {
+	if c.AppendCPUs() == nil {
 		t.Errorf("Error expected")
 	}
 }
 
 func TestBadFwcfg(t *testing.T) {
 	c := &Config{}
-	c.appendFwCfg(nil)
+	c.AppendFwCfg(nil)
 	if len(c.qemuParams) != 0 {
 		t.Errorf("Expected empty qemuParams, found %s", c.qemuParams)
 	}
@@ -1144,7 +1144,7 @@ func TestBadFwcfg(t *testing.T) {
 			},
 		},
 	}
-	c.appendFwCfg(nil)
+	c.AppendFwCfg(nil)
 	if len(c.qemuParams) != 0 {
 		t.Errorf("Expected empty qemuParams, found %s", c.qemuParams)
 	}

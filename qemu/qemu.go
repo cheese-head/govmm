@@ -950,7 +950,7 @@ func (netdev NetDevice) QemuNetdevParams(config *Config) []string {
 		netdevParams = append(netdevParams, "vhost=on")
 		if len(netdev.VhostFDs) > 0 {
 			var fdParams []string
-			qemuFDs := config.appendFDs(netdev.VhostFDs)
+			qemuFDs := config.AppendFDs(netdev.VhostFDs)
 			for _, fd := range qemuFDs {
 				fdParams = append(fdParams, fmt.Sprintf("%d", fd))
 			}
@@ -961,7 +961,7 @@ func (netdev NetDevice) QemuNetdevParams(config *Config) []string {
 	if len(netdev.FDs) > 0 {
 		var fdParams []string
 
-		qemuFDs := config.appendFDs(netdev.FDs)
+		qemuFDs := config.AppendFDs(netdev.FDs)
 		for _, fd := range qemuFDs {
 			fdParams = append(fdParams, fmt.Sprintf("%d", fd))
 		}
@@ -2025,7 +2025,7 @@ func (vsock VSOCKDevice) QemuParams(config *Config) []string {
 		deviceParams = append(deviceParams, s)
 	}
 	if vsock.VHostFD != nil {
-		qemuFDs := config.appendFDs([]*os.File{vsock.VHostFD})
+		qemuFDs := config.AppendFDs([]*os.File{vsock.VHostFD})
 		deviceParams = append(deviceParams, fmt.Sprintf("vhostfd=%d", qemuFDs[0]))
 	}
 	deviceParams = append(deviceParams, fmt.Sprintf("id=%s", vsock.ID))
@@ -2628,7 +2628,7 @@ type Config struct {
 
 // appendFDs append a list of file descriptors to the qemu configuration and
 // returns a slice of offset file descriptors that will be seen by the qemu process.
-func (config *Config) appendFDs(fds []*os.File) []int {
+func (config *Config) AppendFDs(fds []*os.File) []int {
 	var fdInts []int
 
 	oldLen := len(config.fds)
@@ -2646,21 +2646,21 @@ func (config *Config) appendFDs(fds []*os.File) []int {
 	return fdInts
 }
 
-func (config *Config) appendSeccompSandbox() {
+func (config *Config) AppendSeccompSandbox() {
 	if config.SeccompSandbox != "" {
 		config.qemuParams = append(config.qemuParams, "-sandbox")
 		config.qemuParams = append(config.qemuParams, config.SeccompSandbox)
 	}
 }
 
-func (config *Config) appendName() {
+func (config *Config) AppendName() {
 	if config.Name != "" {
 		config.qemuParams = append(config.qemuParams, "-name")
 		config.qemuParams = append(config.qemuParams, config.Name)
 	}
 }
 
-func (config *Config) appendMachine() {
+func (config *Config) AppendMachine() {
 	if config.Machine.Type != "" {
 		var machineParams []string
 
@@ -2679,14 +2679,14 @@ func (config *Config) appendMachine() {
 	}
 }
 
-func (config *Config) appendCPUModel() {
+func (config *Config) AppendCPUModel() {
 	if config.CPUModel != "" {
 		config.qemuParams = append(config.qemuParams, "-cpu")
 		config.qemuParams = append(config.qemuParams, config.CPUModel)
 	}
 }
 
-func (config *Config) appendQMPSockets() {
+func (config *Config) AppendQMPSockets() {
 	for _, q := range config.QMPSockets {
 		if !q.Valid() {
 			continue
@@ -2705,7 +2705,7 @@ func (config *Config) appendQMPSockets() {
 	}
 }
 
-func (config *Config) appendDevices(logger QMPLog) {
+func (config *Config) AppendDevices(logger QMPLog) {
 	if logger == nil {
 		logger = qmpNullLogger{}
 	}
@@ -2720,14 +2720,14 @@ func (config *Config) appendDevices(logger QMPLog) {
 	}
 }
 
-func (config *Config) appendUUID() {
+func (config *Config) AppendUUID() {
 	if config.UUID != "" {
 		config.qemuParams = append(config.qemuParams, "-uuid")
 		config.qemuParams = append(config.qemuParams, config.UUID)
 	}
 }
 
-func (config *Config) appendMemory() {
+func (config *Config) AppendMemory() {
 	if config.Memory.Size != "" {
 		var memoryParams []string
 
@@ -2746,7 +2746,7 @@ func (config *Config) appendMemory() {
 	}
 }
 
-func (config *Config) appendCPUs() error {
+func (config *Config) AppendCPUs() error {
 	if config.SMP.CPUs > 0 {
 		var SMPParams []string
 
@@ -2779,7 +2779,7 @@ func (config *Config) appendCPUs() error {
 	return nil
 }
 
-func (config *Config) appendRTC() {
+func (config *Config) AppendRTC() {
 	if !config.RTC.Valid() {
 		return
 	}
@@ -2800,28 +2800,28 @@ func (config *Config) appendRTC() {
 	config.qemuParams = append(config.qemuParams, strings.Join(RTCParams, ","))
 }
 
-func (config *Config) appendGlobalParam() {
+func (config *Config) AppendGlobalParam() {
 	if config.GlobalParam != "" {
 		config.qemuParams = append(config.qemuParams, "-global")
 		config.qemuParams = append(config.qemuParams, config.GlobalParam)
 	}
 }
 
-func (config *Config) appendPFlashParam() {
+func (config *Config) AppendPFlashParam() {
 	for _, p := range config.PFlash {
 		config.qemuParams = append(config.qemuParams, "-pflash")
 		config.qemuParams = append(config.qemuParams, p)
 	}
 }
 
-func (config *Config) appendVGA() {
+func (config *Config) AppendVGA() {
 	if config.VGA != "" {
 		config.qemuParams = append(config.qemuParams, "-vga")
 		config.qemuParams = append(config.qemuParams, config.VGA)
 	}
 }
 
-func (config *Config) appendKernel() {
+func (config *Config) AppendKernel() {
 	if config.Kernel.Path != "" {
 		config.qemuParams = append(config.qemuParams, "-kernel")
 		config.qemuParams = append(config.qemuParams, config.Kernel.Path)
@@ -2838,7 +2838,7 @@ func (config *Config) appendKernel() {
 	}
 }
 
-func (config *Config) appendMemoryKnobs() {
+func (config *Config) AppendMemoryKnobs() {
 	if config.Memory.Size == "" {
 		return
 	}
@@ -2873,7 +2873,7 @@ func (config *Config) appendMemoryKnobs() {
 	}
 }
 
-func (config *Config) appendKnobs() {
+func (config *Config) AppendKnobs() {
 	if config.Knobs.NoUserConfig {
 		config.qemuParams = append(config.qemuParams, "-no-user-config")
 	}
@@ -2898,7 +2898,7 @@ func (config *Config) appendKnobs() {
 		config.qemuParams = append(config.qemuParams, "-daemonize")
 	}
 
-	config.appendMemoryKnobs()
+	config.AppendMemoryKnobs()
 
 	if config.Knobs.Mlock {
 		config.qemuParams = append(config.qemuParams, "-overcommit")
@@ -2910,14 +2910,14 @@ func (config *Config) appendKnobs() {
 	}
 }
 
-func (config *Config) appendBios() {
+func (config *Config) AppendBios() {
 	if config.Bios != "" {
 		config.qemuParams = append(config.qemuParams, "-bios")
 		config.qemuParams = append(config.qemuParams, config.Bios)
 	}
 }
 
-func (config *Config) appendIOThreads() {
+func (config *Config) AppendIOThreads() {
 	for _, t := range config.IOThreads {
 		if t.ID != "" {
 			config.qemuParams = append(config.qemuParams, "-object")
@@ -2926,13 +2926,13 @@ func (config *Config) appendIOThreads() {
 	}
 }
 
-func (config *Config) appendIncoming() {
+func (config *Config) AppendIncoming() {
 	var uri string
 	switch config.Incoming.MigrationType {
 	case MigrationExec:
 		uri = fmt.Sprintf("exec:%s", config.Incoming.Exec)
 	case MigrationFD:
-		chFDs := config.appendFDs([]*os.File{config.Incoming.FD})
+		chFDs := config.AppendFDs([]*os.File{config.Incoming.FD})
 		uri = fmt.Sprintf("fd:%d", chFDs[0])
 	case MigrationDefer:
 		uri = "defer"
@@ -2942,21 +2942,21 @@ func (config *Config) appendIncoming() {
 	config.qemuParams = append(config.qemuParams, "-S", "-incoming", uri)
 }
 
-func (config *Config) appendPidFile() {
+func (config *Config) AppendPidFile() {
 	if config.PidFile != "" {
 		config.qemuParams = append(config.qemuParams, "-pidfile")
 		config.qemuParams = append(config.qemuParams, config.PidFile)
 	}
 }
 
-func (config *Config) appendLogFile() {
+func (config *Config) AppendLogFile() {
 	if config.LogFile != "" {
 		config.qemuParams = append(config.qemuParams, "-D")
 		config.qemuParams = append(config.qemuParams, config.LogFile)
 	}
 }
 
-func (config *Config) appendFwCfg(logger QMPLog) {
+func (config *Config) AppendFwCfg(logger QMPLog) {
 	if logger == nil {
 		logger = qmpNullLogger{}
 	}
@@ -2981,28 +2981,28 @@ func (config *Config) appendFwCfg(logger QMPLog) {
 // will be returned if the launch succeeds.  Otherwise a string containing
 // the contents of stderr + a Go error object will be returned.
 func LaunchQemu(config Config, logger QMPLog) (string, error) {
-	config.appendName()
-	config.appendUUID()
-	config.appendMachine()
-	config.appendCPUModel()
-	config.appendQMPSockets()
-	config.appendMemory()
-	config.appendDevices(logger)
-	config.appendRTC()
-	config.appendGlobalParam()
-	config.appendPFlashParam()
-	config.appendVGA()
-	config.appendKnobs()
-	config.appendKernel()
-	config.appendBios()
-	config.appendIOThreads()
-	config.appendIncoming()
-	config.appendPidFile()
-	config.appendLogFile()
-	config.appendFwCfg(logger)
-	config.appendSeccompSandbox()
+	config.AppendName()
+	config.AppendUUID()
+	config.AppendMachine()
+	config.AppendCPUModel()
+	config.AppendQMPSockets()
+	config.AppendMemory()
+	config.AppendDevices(logger)
+	config.AppendRTC()
+	config.AppendGlobalParam()
+	config.AppendPFlashParam()
+	config.AppendVGA()
+	config.AppendKnobs()
+	config.AppendKernel()
+	config.AppendBios()
+	config.AppendIOThreads()
+	config.AppendIncoming()
+	config.AppendPidFile()
+	config.AppendLogFile()
+	config.AppendFwCfg(logger)
+	config.AppendSeccompSandbox()
 
-	if err := config.appendCPUs(); err != nil {
+	if err := config.AppendCPUs(); err != nil {
 		return "", err
 	}
 
