@@ -1157,6 +1157,7 @@ const (
 const (
 	// QCOW2 is the Qemu Copy On Write v2 image format.
 	QCOW2 BlockDeviceFormat = "qcow2"
+	Raw   BlockDeviceFormat = "raw"
 )
 
 // BlockDevice represents a qemu block device.
@@ -2548,9 +2549,6 @@ type Config struct {
 	// Path is the qemu binary path.
 	Path string
 
-	// Ctx is the context used when launching qemu.
-	Ctx context.Context
-
 	// User ID.
 	Uid uint32
 	// Group ID.
@@ -2623,7 +2621,18 @@ type Config struct {
 	// LogFile is the -D parameter
 	LogFile string
 
+	// Display is the -display option
+	Display string
+
 	qemuParams []string
+}
+
+func (config *Config) GetQemuParams() []string {
+	return config.qemuParams
+}
+
+func (config *Config) GetFds() []*os.File {
+	return config.fds
 }
 
 // appendFDs append a list of file descriptors to the qemu configuration and
@@ -2971,6 +2980,27 @@ func (config *Config) AppendFwCfg(logger QMPLog) {
 	}
 }
 
+func (config *Config) AppendDisplay() {
+	if config.Display != "" {
+		// -display sdl[,frame=on|off][,alt_grab=on|off][,ctrl_grab=on|off]
+		// -display gtk[,grab_on_hover=on|off][,gl=on|off]|
+		// -display vnc=<display>[,<optargs>]
+		// -display curses
+		// -display none
+		// -display egl-headless[,rendernode=<file>]                select display type
+		// The default display is equivalent to
+		//         "-display gtk"
+		// -curses         shorthand for -display curses
+		// -sdl            shorthand for -display sdl
+		//        [,tls-channel=[main|display|cursor|inputs|record|playback]]
+		//        [,plaintext-channel=[main|display|cursor|inputs|record|playback]]
+		// -vnc <display>  shorthand for -display vnc=<display>
+		config.qemuParams = append(config.qemuParams, "-display")
+		config.qemuParams = append(config.qemuParams, "none")
+	}
+
+}
+
 // LaunchQemu can be used to launch a new qemu instance.
 //
 // The Config parameter contains a set of qemu parameters and settings.
@@ -2980,7 +3010,7 @@ func (config *Config) AppendFwCfg(logger QMPLog) {
 // The function will block until the launched qemu process exits.  "", nil
 // will be returned if the launch succeeds.  Otherwise a string containing
 // the contents of stderr + a Go error object will be returned.
-func LaunchQemu(config Config, logger QMPLog) (string, error) {
+func LaunchQemu(ctx context.Context, config Config, logger QMPLog) (string, error) {
 	config.AppendName()
 	config.AppendUUID()
 	config.AppendMachine()
@@ -3004,11 +3034,6 @@ func LaunchQemu(config Config, logger QMPLog) (string, error) {
 
 	if err := config.AppendCPUs(); err != nil {
 		return "", err
-	}
-
-	ctx := config.Ctx
-	if ctx == nil {
-		ctx = context.Background()
 	}
 
 	attr := syscall.SysProcAttr{}
