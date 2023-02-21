@@ -1,3 +1,3 @@
-module github.com/p-real/govmm
+module github.com/cheese-head/govmm
 
 go 1.19
